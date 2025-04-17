@@ -1,0 +1,43 @@
+// app/api/admin/login/route.ts
+import { NextResponse } from 'next/server';
+import axios from 'axios';
+
+export async function POST(request: Request) {
+  const body = await request.json();
+// Extract CSRF token from incoming request headers
+const csrfToken = request.headers.get('x-csrf-token');
+  try {
+    // Call your backend API (adjust the URL as needed)
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/admin/login`,
+      body,
+     {
+      headers:{
+        'x-csrf-token': csrfToken || '',
+      }
+     }
+    );
+
+    if (response.data.success) {
+      // Create a response and set an HTTP-only session cookie
+      const res = NextResponse.json(response.data, { status: 200 });
+      res.cookies.set('token', response.data.data.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 3600, // 1 hour (adjust as needed)
+        path: '/',
+      });
+      return res;
+    } else {
+      return NextResponse.json(
+        { success: false, error: response.data.error },
+        { status: 401 }
+      );
+    }
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.response?.data?.error || error.message },
+      { status: error.response?.status || 500 }
+    );
+  }
+}

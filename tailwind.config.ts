@@ -11,7 +11,12 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        primary:"bg-blue-300"
       },
+      body: {
+        'overflow-y-hidden': 'overflow-y: hidden',
+      },
+     
     },
   },
   plugins: [],
