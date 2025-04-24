@@ -27,10 +27,10 @@ export default function DashboardAdmin() {
   useEffect(() => {
     if (!authLoading) {
       if (!user?.role || user?.role !== "admin") {
-        console.log("Unauthorized, redirecting to login");
+        //console.log("Unauthorized, redirecting to login");
         router.push("/admin/login");
       } else {
-        console.log("Authorized, setting isLoading to false");
+        //console.log("Authorized, setting isLoading to false");
         setIsLoading(false);
       }
     }
