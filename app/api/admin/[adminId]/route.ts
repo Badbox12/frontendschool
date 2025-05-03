@@ -7,10 +7,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const adminId = params.id;
     const externalApiUrl = process.env.NEXT_PUBLIC_API_URL;
     if (!externalApiUrl) throw new Error("EXTERNAL_API_URL is not defined");
 
-    const response = await axios.get(`${externalApiUrl}/admin/${params.id}`);
+    const response = await axios.get(`${externalApiUrl}/admin/${adminId}`);
+    console.log("GET admin by ID", response.data);
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: any) {
     return NextResponse.json(

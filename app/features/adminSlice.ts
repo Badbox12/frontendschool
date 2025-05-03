@@ -2,7 +2,7 @@ import { LogEntry } from "@/types/admin";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 //import { promoteAdminApi, demoteAdminApi, suspendAdminApi } from "@/app/api/adminApi";
-import nookies from 'nookies';
+import nookies from "nookies";
 // Define the type for an admin
 export interface Admin {
   _id: string;
@@ -28,49 +28,93 @@ const initialState: AdminState = {
   loading: false,
   error: undefined,
   logs: {}, // <--- logs: { [adminId]: LogEntry[] }
-
 };
-export const deleteAdmin = createAsyncThunk('admin/delete', async (id: string, { rejectWithValue }) => {
-  try {
-    const res = await axios.post('/api/admin/deleteAdmin', { id });
-    if (!res.data.success) throw new Error(res.data.error || "Failed to delete admin");
-    return id;
-  } catch (error: any) {
-    return rejectWithValue(error.message);
+export const deleteAdmin = createAsyncThunk(
+  "admin/delete",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("/api/admin/deleteAdmin", { id });
+      if (!res.data.success)
+        throw new Error(res.data.error || "Failed to delete admin");
+      return id;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 // Promote admin
-export const promoteAdmin = createAsyncThunk<string, string>('admin/promote', async (id: string) => {
-  const res = await axios.post('/api/admin/promote', { id });
-  if (!res.data.success) throw new Error(res.data.error || "Failed to promote");
-  return id;
-});
+export const promoteAdmin = createAsyncThunk<string, string>(
+  "admin/promote",
+  async (id: string) => {
+    const res = await axios.post("/api/admin/promote", { id });
+    if (!res.data.success)
+      throw new Error(res.data.error || "Failed to promote");
+    return id;
+  }
+);
 
 // Demote admin
-export const demoteAdmin = createAsyncThunk<string, string>('admin/demote', async (id: string) => {
-  const res = await axios.post('/api/admin/demote', { id });
-  if (!res.data.success) throw new Error(res.data.error || "Failed to demote");
-  return id;
-});
+export const demoteAdmin = createAsyncThunk<string, string>(
+  "admin/demote",
+  async (id: string) => {
+    const res = await axios.post("/api/admin/demote", { id });
+    if (!res.data.success)
+      throw new Error(res.data.error || "Failed to demote");
+    return id;
+  }
+);
 
 // Suspend admin
-export const suspendAdmin = createAsyncThunk<string, string>('admin/suspend', async (id: string) => {
-  const res = await axios.post('/api/admin/suspend', { id });
-  if (!res.data.success) throw new Error(res.data.error || "Failed to suspend");
-  return id;
-});
+export const suspendAdmin = createAsyncThunk<string, string>(
+  "admin/suspend",
+  async (id: string) => {
+    const res = await axios.post("/api/admin/suspend", { id });
+    if (!res.data.success)
+      throw new Error(res.data.error || "Failed to suspend");
+    return id;
+  }
+);
 // Fetch logs for a given admin
-export const fetchAdminLogs = createAsyncThunk('admin/logs', async (adminId: string) => {
-  const res = await axios.get(`/api/admin/${adminId}/logs`);
-  return { adminId, logs: res.data.data };
-});
+export const fetchAdminLogs = createAsyncThunk(
+  "admin/logs",
+  async (adminId: string) => {
+    const res = await axios.get(`/api/admin/${adminId}/logs`);
+    return { adminId, logs: res.data.data };
+  }
+);
 // Reset admin password
-export const resetAdminPassword = createAsyncThunk('admin/resetPassword', async ({ id, newPassword } : any) => {
-  const res = await axios.post('/api/admin/resetpassword', { id, newPassword });
-  if (!res.data.success) throw new Error(res.data.error || "Failed to reset password");
-  return id;
-});
+export const resetAdminPassword = createAsyncThunk(
+  "admin/resetPassword",
+  async ({ id, newPassword }: any) => {
+    const res = await axios.post("/api/admin/resetpassword", {
+      id,
+      newPassword,
+    });
+    if (!res.data.success)
+      throw new Error(res.data.error || "Failed to reset password");
+    return id;
+  }
+);
 
+// Add this thunk for POST logging
+export const logAdminActivity = createAsyncThunk(
+  "admin/logActivity",
+  async ({
+    adminId,
+    action,
+    details,
+  }: {
+    adminId: string;
+    action: string;
+    details?: string;
+  }) => {
+    const res = await axios.post(`/api/admin/${adminId}/logs`, {
+      action,
+      details,
+    });
+    return res.data.log; // returns the new log entry
+  }
+);
 // Create admin async thunk
 export const createAdminAction = createAsyncThunk<
   Admin,
@@ -96,14 +140,13 @@ export const fetchAdmins = createAsyncThunk<
   { rejectValue: string }
 >("admin/fetchAll", async (_, { rejectWithValue }) => {
   try {
-    
     const cookies = nookies.get(); // returns an object of cookies
-    const token = cookies.token
-    console.log(token)
-    const response = await axios.get("/api/admin/all",{
+    const token = cookies.token;
+    console.log(token);
+    const response = await axios.get("/api/admin/all", {
       headers: {
-        Authorization: token ? `Bearer ${token}` :''
-      }
+        Authorization: token ? `Bearer ${token}` : "",
+      },
     });
     if (response.data.success) {
       return response.data.data as Admin[];
@@ -185,7 +228,6 @@ const adminSlice = createSlice({
     clearCurrentAdmin(state) {
       state.currentAdmin = undefined;
     },
-   
   },
   extraReducers: (builder) => {
     // Create admin
@@ -230,20 +272,20 @@ const adminSlice = createSlice({
       state.error = action.payload;
     });
     builder.addCase(promoteAdmin.fulfilled, (state, action) => {
-      const admin = state.admins.find(a => a._id === action.payload);
-      if (admin) admin.role = 'superadmin';
-    })
+      const admin = state.admins.find((a) => a._id === action.payload);
+      if (admin) admin.role = "superadmin";
+    });
     builder.addCase(demoteAdmin.fulfilled, (state, action) => {
-      const admin = state.admins.find(a => a._id === action.payload);
-      if (admin) admin.role = 'admin';
-    })
+      const admin = state.admins.find((a) => a._id === action.payload);
+      if (admin) admin.role = "admin";
+    });
     builder.addCase(suspendAdmin.fulfilled, (state, action) => {
-      const admin = state.admins.find(a => a._id === action.payload);
-      if (admin) admin.status = 'suspended';
-    })
+      const admin = state.admins.find((a) => a._id === action.payload);
+      if (admin) admin.status = "suspended";
+    });
     builder.addCase(resetAdminPassword.fulfilled, (state, action) => {
       // Optionally show toast or update state
-    })
+    });
     // Update admin
     builder.addCase(updateAdminAction.pending, (state) => {
       state.loading = true;
@@ -268,8 +310,8 @@ const adminSlice = createSlice({
     });
 
     builder.addCase(deleteAdmin.fulfilled, (state, action) => {
-      state.admins = state.admins.filter(a => a._id !== action.payload);
-    })
+      state.admins = state.admins.filter((a) => a._id !== action.payload);
+    });
     builder.addCase(deleteAdmin.rejected, (state, action) => {
       state.error = action.payload as string;
     });
@@ -278,6 +320,14 @@ const adminSlice = createSlice({
         ...state.logs,
         [action.payload.adminId]: action.payload.logs,
       };
+    });
+    // Handle adding new log entry
+    builder.addCase(logAdminActivity.fulfilled, (state, action) => {
+      const log = action.payload;
+      if (log && log.adminId) {
+        if (!state.logs[log.adminId]) state.logs[log.adminId] = [];
+        state.logs[log.adminId].unshift(log);
+      }
     });
   },
 });

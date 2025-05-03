@@ -10,18 +10,30 @@ interface SuperAdminLayoutProps {
     children: React.ReactNode;
   }function ProtectedSuperAdminLayout({ children }: SuperAdminLayoutProps) {
     const user = useAppSelector((state) => state.auth.user);
+    const {token} = useAppSelector((state) => state.auth);
+    console.log("ProtectedSuperAdminLayout: token =", token);
+    
     console.log("ProtectedSuperAdminLayout: user =", user);
     const loading = useAppSelector((state) => state.auth.loading);
     const router = useRouter();
   
     useEffect(() => {
+       // Check for a token in cookies (or localStorage if you use that)
+    let hasToken = false;
+    if (typeof window !== "undefined") {
+      // Check cookies for "super_token"
+      hasToken = document.cookie.split("; ").some((c) => c.startsWith("token="));
+  
+    }
       if (!loading) {
-        if (!user || user.role !== "superadmin") {
+        if (!user || user.role !== "superadmin" || !hasToken) {
           router.replace("/super-admin/login");
         }
       }
     }, [user, loading, router]);
   
+  
+    
     // Optionally show a loading spinner while checking session
     if (loading || !user) {
       return <div className="flex items-center justify-center h-screen">Loading...</div>;

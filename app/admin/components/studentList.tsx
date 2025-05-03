@@ -538,8 +538,8 @@ export default function StudentsList() {
                     Guardian Contact
                   </label>
                   <input
-                    type="telephone"
-                    pattern="[0-9]{10}"
+                    type="text"
+                    
                     id="guardianContact"
                     name="guardianContact"
                     required

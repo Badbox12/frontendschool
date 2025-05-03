@@ -14,9 +14,23 @@ export default function AdminsListPage() {
   const { admins, loading, error } = useAppSelector((state) => state.admin);
 
   useEffect(() => { dispatch(fetchAdmins()); }, [dispatch]);
-
+// Logout handler (replace with your real logout logic)
+const handleLogout = () => {
+  document.cookie = "token=; Max-Age=0; path=/";
+  window.location.href = '/super-admin/login';
+};
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 min-h-screen bg-gray-50">
+        {/* Logout Button - fixed bottom left */}
+        <button
+        onClick={handleLogout}
+        className="fixed bottom-8 left-8 z-50 flex items-center gap-2 px-5 py-2 rounded-full bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 transition-all duration-200"
+      >
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+        </svg>
+        Logout
+      </button>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Admin Management</h1>
         <Link

@@ -19,5 +19,14 @@ export default {
      
     },
   },
-  plugins: [],
+  plugins: [
+    function({addUtilities} : any) {
+      addUtilities({
+        '.drop-shadow-glow': {
+          'text-shadow': '0 0 6px #818cf8, 0 0 10px #6366f1, 0 0 2px #a5b4fc',
+        },
+      })
+
+    }
+  ],
 } satisfies Config;

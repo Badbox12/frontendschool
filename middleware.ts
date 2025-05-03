@@ -34,10 +34,23 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
   }
-  
+   // NEW: Protect /super-admin routes
+   if (
+    req.nextUrl.pathname.startsWith("/super-admin")
+  ) {
+    const superToken = req.cookies.get("super_token")?.value;
+    if (!superToken) {
+      const loginUrl = req.nextUrl.clone();
+      loginUrl.pathname = "/super-admin/login";
+      return NextResponse.redirect(loginUrl);
+    }
+    // Optional: decode JWT/etc. here to check for a role
+    // If you want, add a check for a "role" claim in the token
+    // and redirect if user is not actually a super admin
+  }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*","/super-admin/:path*",],
 };
