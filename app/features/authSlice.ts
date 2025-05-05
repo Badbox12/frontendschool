@@ -1,6 +1,7 @@
 // features/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
+import { sup } from "framer-motion/client";
 
 interface User {
   _id: string;
@@ -39,11 +40,23 @@ export const loginUser = createAsyncThunk<
   try {
     // Call the login API endpoint
     const response = await axios.post("/api/admin/login", credentials);
-    const { token, username, role, email } = response.data.data;
+    const { token,super_token, username, role, email } = response.data.data;
+    console.log("authSlice: loginUser response Super Token =", super_token);
+    console.log("authSlice: loginUser response Token =", token);
     if (response.data.success) {
+      const tokenToStore = super_token || token;
+      if (typeof window !== "undefined" && tokenToStore) {
+        localStorage.setItem("token", tokenToStore);
+        if(super_token) {
+          localStorage.setItem("super_token", super_token);
+          localStorage.removeItem("token");
+        }else{
+          localStorage.removeItem("super_token");
+        }
+      }
       return {
         user: { username, role, email },
-        token,
+        token: tokenToStore,
       } as AuthData;
     } else {
       return rejectWithValue(response.data.error);
@@ -83,6 +96,7 @@ export const logoutUser = createAsyncThunk<null, void, { rejectValue: string }>(
       await axios.post("/api/auth/logout"); // Clear server-side session
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
+        localStorage.removeItem("super_token");
       }
       return null;
     } catch (error: any) {
@@ -122,6 +136,7 @@ const authSlice = createSlice({
       state.registrationMessage = undefined;
       if (typeof window !== "undefined") {
         localStorage.removeItem("token"); // Clear token from local storage
+        localStorage.removeItem("super_token");
       }
     },
     clearRegistrationMessage(state) {
@@ -177,6 +192,7 @@ const authSlice = createSlice({
       state.loading = false;
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
+        localStorage.removeItem("super_token");
       }
     });
     builder.addCase(logoutUser.rejected, (state, action) => {

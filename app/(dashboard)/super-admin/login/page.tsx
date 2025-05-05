@@ -12,6 +12,7 @@ const SuperAdminLoginPage = () => {
   const { loading, error, token } = useSelector(
     (state: RootState) => state.auth
   );
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -21,7 +22,7 @@ const SuperAdminLoginPage = () => {
       const result = await dispatch(loginUser({ email, password })).unwrap();
       if (result.token && result.user?.role === "superadmin") {
         toast.success("Welcome, Super Admin!");
-        router.push("/super-admin/admins");
+        router.replace("/super-admin/admins");
       } else {
         toast.error("You are not a superadmin.");
       }

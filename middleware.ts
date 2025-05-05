@@ -36,7 +36,9 @@ export function middleware(req: NextRequest) {
   }
    // NEW: Protect /super-admin routes
    if (
-    req.nextUrl.pathname.startsWith("/super-admin")
+    req.nextUrl.pathname.startsWith("/super-admin") &&
+    !req.nextUrl.pathname.startsWith("/super-admin/login")
+  
   ) {
     const superToken = req.cookies.get("super_token")?.value;
     if (!superToken) {
@@ -52,5 +54,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*","/super-admin/:path*",],
+  matcher: ["/admin/:path*","/super-admin/:path*"],
 };

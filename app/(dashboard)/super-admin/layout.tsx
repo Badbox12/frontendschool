@@ -1,5 +1,5 @@
 'use client';
-import Link from "next/link";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Provider } from "react-redux";
@@ -11,22 +11,22 @@ interface SuperAdminLayoutProps {
   }function ProtectedSuperAdminLayout({ children }: SuperAdminLayoutProps) {
     const user = useAppSelector((state) => state.auth.user);
     const {token} = useAppSelector((state) => state.auth);
-    console.log("ProtectedSuperAdminLayout: token =", token);
+    // console.log("ProtectedSuperAdminLayout: token =", token);
     
-    console.log("ProtectedSuperAdminLayout: user =", user);
+    // console.log("ProtectedSuperAdminLayout: user =", user);
     const loading = useAppSelector((state) => state.auth.loading);
     const router = useRouter();
   
     useEffect(() => {
        // Check for a token in cookies (or localStorage if you use that)
-    let hasToken = false;
+     let hasSuperToken = false;
     if (typeof window !== "undefined") {
       // Check cookies for "super_token"
-      hasToken = document.cookie.split("; ").some((c) => c.startsWith("token="));
-  
+      hasSuperToken = document.cookie.split("; ").some((c) => c.startsWith("super_token="));
+      //console.log("ProtectedSuperAdminLayout: hasSuperToken =", hasSuperToken);
     }
       if (!loading) {
-        if (!user || user.role !== "superadmin" || !hasToken) {
+        if (!user || user.role !== "superadmin" || !hasSuperToken) {
           router.replace("/super-admin/login");
         }
       }

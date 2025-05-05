@@ -16,7 +16,7 @@ export default function AdminsListPage() {
   useEffect(() => { dispatch(fetchAdmins()); }, [dispatch]);
 // Logout handler (replace with your real logout logic)
 const handleLogout = () => {
-  document.cookie = "token=; Max-Age=0; path=/";
+  document.cookie = "super_token=; Max-Age=0; path=/";
   window.location.href = '/super-admin/login';
 };
   return (
