@@ -1,66 +1,64 @@
 'use client';
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Provider } from "react-redux";
 import { store, persistor } from "@/app/store/store";
-import {  useAppSelector } from "@/app/hook/hooks";
+import { useAppSelector } from "@/app/hook/hooks";
 import { PersistGate } from "redux-persist/integration/react";
+import SuperAdminNavbar from '@/app/components/SuperAdminNavBar';
+import { ToastContainer } from "react-toastify";
 interface SuperAdminLayoutProps {
-    children: React.ReactNode;
-  }function ProtectedSuperAdminLayout({ children }: SuperAdminLayoutProps) {
-    const user = useAppSelector((state) => state.auth.user);
-    const {token} = useAppSelector((state) => state.auth);
-    // console.log("ProtectedSuperAdminLayout: token =", token);
-    
-    // console.log("ProtectedSuperAdminLayout: user =", user);
-    const loading = useAppSelector((state) => state.auth.loading);
-    const router = useRouter();
-  
-    useEffect(() => {
-       // Check for a token in cookies (or localStorage if you use that)
-     let hasSuperToken = false;
-    if (typeof window !== "undefined") {
-      // Check cookies for "super_token"
-      hasSuperToken = document.cookie.split("; ").some((c) => c.startsWith("super_token="));
-      //console.log("ProtectedSuperAdminLayout: hasSuperToken =", hasSuperToken);
-    }
-      if (!loading) {
-        if (!user || user.role !== "superadmin" || !hasSuperToken) {
-          router.replace("/super-admin/login");
-        }
-      }
-    }, [user, loading, router]);
-  
-  
-    
-    // Optionally show a loading spinner while checking session
-    if (loading || !user) {
-      return <div className="flex items-center justify-center h-screen">Loading...</div>;
-    }
-  
-    return <>{children}</>;
-  }
+  children: React.ReactNode;
+}
 
-const SuperAdminLayout = ({ children } : SuperAdminLayoutProps) => {
+function ProtectedSuperAdminLayout({ children }: SuperAdminLayoutProps) {
+  console.log("ProtectedSuperAdminLayout rendering");
+  const { super_token } = useAppSelector((state) => state.auth);
+ 
+  const router = useRouter();
+  
+  
+  
+  // Perform initial checks
+  useEffect(() => {
+    if (!super_token) {
+      // Redirect to login if not authenticated
+      router.push("/super-admin/login");
+    }
+      
+   
+  }, [super_token, router]);
+  
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <SuperAdminNavbar />
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {children}
+      </main>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </div>
+  );
+}
+
+const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
   return (
     <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-      <ProtectedSuperAdminLayout>
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-          <nav className="bg-blue-700 py-4 text-white">
-            <div className="flex justify-between items-center max-w-6xl mx-auto">
-              <h1 className="text-2xl font-bold">Super Admin Dashboard</h1>
-              <div>
-                {/* Add more nav links as needed */}
+      <PersistGate loading={<div>Loading Redux store...</div>} persistor={persistor}>
+        <ProtectedSuperAdminLayout>
+          <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+            <nav className="bg-blue-700 py-4 text-white">
+              <div className="flex justify-between items-center max-w-6xl mx-auto">
+                {/* <h1 className="text-2xl font-bold">Super Admin Dashboard</h1> */}
+               
               </div>
-            </div>
-          </nav>
-          <main className="p-8 max-w-6xl mx-auto">{children}</main>
-        </div>
-      </ProtectedSuperAdminLayout>
-    </PersistGate>
-  </Provider>
+            </nav>
+            <main className="p-8 max-w-6xl mx-auto">{children}</main>
+            
+          </div>
+        </ProtectedSuperAdminLayout>
+      </PersistGate>
+    </Provider>
   );
 };
 

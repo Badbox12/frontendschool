@@ -37,6 +37,14 @@ export async function POST(request: Request) {
           maxAge: 3600,
           path: "/",
         });
+        // Add a client-accessible cookie for JavaScript detection
+        res.cookies.set("has_super_token", "true", {
+          httpOnly: false, // This one can be read by JS
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 3600,
+          path: "/",
+        });
       } else {
         // For regular admin, just set token
         res.cookies.set("token", response.data.data.token, {

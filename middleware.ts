@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  //console.log("Middleware is running for:", req.nextUrl.pathname);
+  //Sconsole.log("Middleware is running for:", req.nextUrl.pathname);
   
   // If the user is accessing /admin/login and has a token, redirect them to the dashboard
   if (req.nextUrl.pathname === "/admin/login") {
@@ -37,7 +37,10 @@ export function middleware(req: NextRequest) {
    // NEW: Protect /super-admin routes
    if (
     req.nextUrl.pathname.startsWith("/super-admin") &&
-    !req.nextUrl.pathname.startsWith("/super-admin/login")
+    !req.nextUrl.pathname.startsWith("/super-admin/login") &&
+    !req.nextUrl.pathname.startsWith("/super-admin/admins")
+  
+    
   
   ) {
     const superToken = req.cookies.get("super_token")?.value;

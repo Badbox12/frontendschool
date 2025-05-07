@@ -13,11 +13,13 @@ interface User {
 interface AuthData {
   user: User;
   token: string;
+  super_token?: string;
 }
 
 interface AuthState {
   user: User | null;
   token: string | null;
+  super_token: string | null;
   loading: boolean;
   error: string | null;
   registrationMessage?: string;
@@ -26,6 +28,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   token: null,
+  super_token: null,
   loading: false,
   error: null,
   registrationMessage: undefined,
@@ -40,23 +43,31 @@ export const loginUser = createAsyncThunk<
   try {
     // Call the login API endpoint
     const response = await axios.post("/api/admin/login", credentials);
-    const { token,super_token, username, role, email } = response.data.data;
+    const { token, super_token, username, role, email } = response.data.data;
     console.log("authSlice: loginUser response Super Token =", super_token);
-    console.log("authSlice: loginUser response Token =", token);
+    //console.log("authSlice: loginUser response Token =", token);
     if (response.data.success) {
-      const tokenToStore = super_token || token;
-      if (typeof window !== "undefined" && tokenToStore) {
-        localStorage.setItem("token", tokenToStore);
-        if(super_token) {
+      const tokenToUse = role === "superadmin" ? super_token : token;
+     
+      if (typeof window !== "undefined" && tokenToUse) {
+        localStorage.setItem("token", tokenToUse);
+        if (super_token) {
           localStorage.setItem("super_token", super_token);
           localStorage.removeItem("token");
-        }else{
+        } else {
           localStorage.removeItem("super_token");
         }
       }
       return {
-        user: { username, role, email },
-        token: tokenToStore,
+        user: {
+          _id: response.data.data._id || "unknown id",
+          username,
+          role,
+          email,
+          status: "active"
+        },
+        super_token: super_token || null,
+        token: tokenToUse
       } as AuthData;
     } else {
       return rejectWithValue(response.data.error);
@@ -152,6 +163,7 @@ const authSlice = createSlice({
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.super_token = action.payload.super_token || null; 
       state.loading = false;
       if (typeof window !== "undefined" && action.payload.token) {
         localStorage.setItem("token", action.payload.token);

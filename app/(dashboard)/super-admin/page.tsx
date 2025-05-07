@@ -1,9 +1,6 @@
-import React from 'react'
-
+import { redirect } from "next/navigation";
 const SuperAdminDashBoard = () => {
-  return (
-    <div>SuperAdminDashBoard</div>
-  )
+      redirect("/super-admin/dashboard"); 
 }
 
 export default SuperAdminDashBoard

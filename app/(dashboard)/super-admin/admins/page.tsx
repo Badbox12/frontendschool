@@ -1,28 +1,43 @@
 'use client';
 import { useEffect } from 'react';
+import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from '@/app/hook/hooks';
 import {
   fetchAdmins, deleteAdmin, promoteAdmin, demoteAdmin, suspendAdmin, resetAdminPassword
 } from '@/app/features/adminSlice';
 import Link from 'next/link';
+import { logoutUser } from '@/app/features/authSlice';
+import { toast } from 'react-toastify';
 
 // You can use a UI library (e.g. Tailwind, Material UI, Chakra UI).
 // This example uses Tailwind CSS for modern, clean styles.
 
 export default function AdminsListPage() {
+  const router = useRouter()
   const dispatch = useAppDispatch();
   const { admins, loading, error } = useAppSelector((state) => state.admin);
 
   useEffect(() => { dispatch(fetchAdmins()); }, [dispatch]);
 // Logout handler (replace with your real logout logic)
-const handleLogout = () => {
-  document.cookie = "super_token=; Max-Age=0; path=/";
-  window.location.href = '/super-admin/login';
+const handleLogout = async () => {
+  try {
+    // Dispatch the logout action from your authSlice
+    await dispatch(logoutUser()).unwrap();
+    
+    // Show success message
+    toast.success("Logged out successfully");
+    
+    // Redirect to login page
+    router.push("/super-admin/login");
+  } catch (error) {
+    console.error("Logout error:", error);
+    toast.error("Failed to logout. Please try again.");
+  }
 };
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 min-h-screen bg-gray-50">
         {/* Logout Button - fixed bottom left */}
-        <button
+        {/* <button
         onClick={handleLogout}
         className="fixed bottom-8 left-8 z-50 flex items-center gap-2 px-5 py-2 rounded-full bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 transition-all duration-200"
       >
@@ -30,7 +45,7 @@ const handleLogout = () => {
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
         </svg>
         Logout
-      </button>
+      </button> */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Admin Management</h1>
         <Link
@@ -166,6 +181,7 @@ const handleLogout = () => {
           )}
         </table>
       </div>
+      
     </div>
   );
 }

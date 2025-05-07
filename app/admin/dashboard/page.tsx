@@ -2,7 +2,7 @@
 import StudentList from "../components/studentList";
 import AdminList from "../components/adminList";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { logout, clearRegistrationMessage } from "../../features/authSlice";
@@ -38,7 +38,7 @@ export default function DashboardAdmin() {
   const handleLogout = async () => {
     try {
       // Call the logout API route
-      const res = await fetch("/api/admin/logout", { method: "POST" });
+      const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
         // Optionally clear Redux auth state
         dispatch(logout());

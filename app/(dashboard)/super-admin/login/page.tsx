@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "@/app/features/authSlice";
 import { useRouter } from "next/navigation";
@@ -9,20 +9,37 @@ import { toast } from "react-toastify";
 const SuperAdminLoginPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { loading, error, token } = useSelector(
+  const { loading, error, user, super_token } = useSelector(
     (state: RootState) => state.auth
   );
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  
+    // Check for cookie and navigate if already set
+    useEffect(() => {  
+      console.log("Super Admin Login is running", super_token);
+        if (super_token && user?.role === "superadmin") {
+          router.push("/super-admin/admins");
+        }
+    }, [user, router]);
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       const result = await dispatch(loginUser({ email, password })).unwrap();
-      if (result.token && result.user?.role === "superadmin") {
-        toast.success("Welcome, Super Admin!");
-        router.replace("/super-admin/admins");
+      if (result.user?.role === "superadmin") {
+        // Check if super_token cookie was set by the API
+        setTimeout(() => {
+          const hasSuperToken = document.cookie.split("; ")
+            .some(c => c.startsWith("has_super_token="));
+            console.log("Super Token Cookie:", hasSuperToken);
+          if (hasSuperToken) {
+            toast.success("Welcome, Super Admin!");
+            router.push("/super-admin/admins");
+          } else {
+            toast.error("Authentication error: Super token not set.");
+          }
+        }, 300); // Small delay to ensure cookie is set
       } else {
         toast.error("You are not a superadmin.");
       }
